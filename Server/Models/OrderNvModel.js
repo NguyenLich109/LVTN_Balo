@@ -99,6 +99,15 @@ const orderSchema = mongoose.Schema(
         deliveredAt: {
             type: Date,
         },
+        receive: {
+            type: Boolean,
+            required: true,
+            default: false,
+        },
+
+        receiveAt: {
+            type: Date,
+        },
         phone: {
             type: String,
             require: true,

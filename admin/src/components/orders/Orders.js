@@ -29,8 +29,6 @@ const Orders = (props) => {
     const userdisabled = useSelector((state) => state.userdisabled);
     const { success: successDisbled, error: errorDisabled } = userdisabled;
 
-    console.log(orderList);
-
     const [kewywordSearch, setKewywordSearch] = useState('');
     const [time1, setTime1] = useState('');
     const [time2, setTime2] = useState('');
@@ -178,7 +176,7 @@ const Orders = (props) => {
                                         <option value={'3'}>Giao hàng</option>
                                         <option value={'4'}>Thanh toán</option>
                                         <option value={'5'}>Hoàn tất</option>
-                                        <option value={'7'}>Thanh toán không thành công</option>
+                                        <option value={'7'}>Giao hàng thất bại</option>
                                         <option value={'6'}>Hủy đơn</option>
                                     </select>
                                 </div>
@@ -217,7 +215,11 @@ const Orders = (props) => {
                                     <td>
                                         {order.isPaid ? (
                                             <span className="badge rounded-pill alert-success">
-                                                Thanh toán {moment(order?.paidAt).hours()}
+                                                Thanh toán{' '}
+                                                {order?.paymentMethod === 'payment-with-online'
+                                                    ? 'điện tử'
+                                                    : 'tiền mặt'}{' '}
+                                                {moment(order?.paidAt).hours()}
                                                 {':'}
                                                 {moment(order?.paidAt).minutes() < 10
                                                     ? `0${moment(order?.paidAt).minutes()}`
@@ -225,11 +227,14 @@ const Orders = (props) => {
                                                 {moment(order?.paidAt).format('DD/MM/YYYY')}{' '}
                                             </span>
                                         ) : order?.errorPaid ? (
-                                            <span className="badge rounded-pill alert-danger">
-                                                Thanh toán không thành công
-                                            </span>
+                                            <span className="badge rounded-pill alert-danger">Giao hàng thất bại</span>
                                         ) : (
-                                            <span className="badge rounded-pill alert-danger">Chờ thanh toán</span>
+                                            <span className="badge rounded-pill alert-danger">
+                                                Chờ thanh toán{' '}
+                                                {order?.paymentMethod === 'payment-with-online'
+                                                    ? 'điện tử'
+                                                    : 'tiền mặt'}{' '}
+                                            </span>
                                         )}
                                     </td>
                                     <td className="badge rounded-pill alert-success">
@@ -245,6 +250,7 @@ const Orders = (props) => {
                                             order?.waitConfirmation &&
                                             order?.isDelivered &&
                                             order?.isPaid &&
+                                            order?.receive &&
                                             order?.completeUser &&
                                             order?.completeAdmin &&
                                             order?.isGuarantee ? (
@@ -265,23 +271,33 @@ const Orders = (props) => {
                                                         : moment(order?.completeAdminAt).minutes()}{' '}
                                                     {moment(order?.completeAdminAt).format('DD/MM/YYYY')}{' '}
                                                 </span>
-                                            ) : order?.waitConfirmation && order?.isDelivered && order?.isPaid ? (
+                                            ) : order?.receive ? (
                                                 <span className="badge alert-success">
-                                                    Đã thanh toán {moment(order?.paidAt).hours()}
+                                                    Đã nhận hàng {moment(order?.receiveAt).hours()}
                                                     {':'}
-                                                    {moment(order?.paidAt).minutes() < 10
-                                                        ? `0${moment(order?.paidAt).minutes()}`
-                                                        : moment(order?.paidAt).minutes()}{' '}
-                                                    {moment(order?.paidAt).format('DD/MM/YYYY')}{' '}
+                                                    {moment(order?.receiveAt).minutes() < 10
+                                                        ? `0${moment(order?.receiveAt).minutes()}`
+                                                        : moment(order?.receiveAt).minutes()}{' '}
+                                                    {moment(order?.receiveAt).format('DD/MM/YYYY')}{' '}
                                                 </span>
                                             ) : order?.errorPaid && order?.waitConfirmation && order?.isDelivered ? (
                                                 <span className="badge alert-danger">
-                                                    Thanh toán không thành công {moment(order?.errorPaidAt).hours()}
+                                                    Giao hàng thất bại {moment(order?.errorPaidAt).hours()}
                                                     {':'}
                                                     {moment(order?.errorPaidAt).minutes() < 10
                                                         ? `0${moment(order?.errorPaidAt).minutes()}`
                                                         : moment(order?.errorPaidAt).minutes()}{' '}
                                                     {moment(order?.errorPaidAt).format('DD/MM/YYYY')}{' '}
+                                                </span>
+                                            ) : order?.waitConfirmation && order?.isDelivered && order?.isPaid ? (
+                                                <span className="badge alert-success">
+                                                    Đã thanh toán {order?.isDelivered ? '(đang giao)' : ''}{' '}
+                                                    {moment(order?.paidAt).hours()}
+                                                    {':'}
+                                                    {moment(order?.paidAt).minutes() < 10
+                                                        ? `0${moment(order?.paidAt).minutes()}`
+                                                        : moment(order?.paidAt).minutes()}{' '}
+                                                    {moment(order?.paidAt).format('DD/MM/YYYY')}{' '}
                                                 </span>
                                             ) : order?.waitConfirmation && order?.isDelivered ? (
                                                 <span className="badge alert-warning">

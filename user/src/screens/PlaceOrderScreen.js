@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { clearFromCart, listCart } from '../Redux/Actions/cartActions';
-import { createOrder } from '../Redux/Actions/OrderActions';
-import { ORDER_CREATE_RESET } from '../Redux/Constants/OrderConstants';
+import { createOrder, payMomoAction } from '../Redux/Actions/OrderActions';
+import { ORDER_CREATE_RESET, PAY_MOMO_USER_RESET } from '../Redux/Constants/OrderConstants';
 import Header from './../components/Header';
 import Message from './../components/LoadingError/Error';
 import PayModal from '../components/Modal/PayModal';
@@ -20,8 +20,7 @@ const Toastobjects = {
     pauseOnHover: false,
     autoClose: 2000,
 };
-
-const PlaceOrderScreen = ({ history }) => {
+const PlaceOrderScreen = ({ history, match }) => {
     // window.scrollTo(0, 0);
     const dispatch = useDispatch();
 
@@ -30,7 +29,10 @@ const PlaceOrderScreen = ({ history }) => {
 
     const checkDiscountReducer = useSelector((state) => state.checkDiscountReducer);
     const { loading: loadingCheck, success: successCheck, error: errorCheck, discount } = checkDiscountReducer;
-    console.log(checkDiscountReducer);
+    const orderCreate = useSelector((state) => state.orderCreate);
+    const { order, success, error } = orderCreate;
+    const payMomoReducer = useSelector((state) => state.payMomoReducer);
+    const { success: sucessPay, payItems } = payMomoReducer;
 
     useEffect(() => {
         if (successCheck) {
@@ -70,6 +72,7 @@ const PlaceOrderScreen = ({ history }) => {
         return (Math.round(num * 100) / 100).toFixed(0);
     };
 
+    cart.paymentMethod = match.params.payment;
     cart.itemsPrice = addDecimals(
         cart.cartItems
             .filter((item) => {
@@ -94,8 +97,6 @@ const PlaceOrderScreen = ({ history }) => {
               ).toFixed(0)
             : 0;
 
-    const orderCreate = useSelector((state) => state.orderCreate);
-    const { order, success, error } = orderCreate;
     useEffect(() => {
         if (error) {
             toast.error(error, Toastobjects);
@@ -103,13 +104,26 @@ const PlaceOrderScreen = ({ history }) => {
         }
     }, [error]);
     useEffect(() => {
-        dispatch(listCart());
-        if (success) {
-            history.push(`/order/${order._id}`);
+        if (success && order.paymentMethod === 'payment-with-online') {
+            dispatch(payMomoAction({ id: order._id, money: order.totalPrice }));
             dispatch({ type: ORDER_CREATE_RESET });
+        } else {
+            if (success) {
+                history.push(`/order/${order._id}`);
+                dispatch({ type: ORDER_CREATE_RESET });
+                dispatch(clearFromCart(userInfo._id));
+            }
+        }
+    }, [dispatch, success, order]);
+
+    useEffect(() => {
+        dispatch(listCart());
+        if (sucessPay) {
+            history.push(`/order/${payItems.orderId}`);
+            dispatch({ type: PAY_MOMO_USER_RESET });
             dispatch(clearFromCart(userInfo._id));
         }
-    }, [history, dispatch, success, order, userInfo]);
+    }, [history, dispatch, sucessPay, payItems, userInfo]);
 
     const placeOrderHandler = () => {
         //if (window.confirm("Are you sure"))
@@ -122,8 +136,7 @@ const PlaceOrderScreen = ({ history }) => {
                     postalCode: '',
                     country: userInfo.country,
                 },
-                // paymentMethod: cart.paymentMethod,
-                paymentMethod: 'Thanh toán bằng tiền mặt',
+                paymentMethod: cart.paymentMethod,
                 itemsPrice: cart.itemsPrice,
                 shippingPrice: cart.shippingPrice,
                 taxPrice: cart.taxPrice,
@@ -262,7 +275,9 @@ const PlaceOrderScreen = ({ history }) => {
                                 <p>
                                     <p>
                                         <span style={{ fontWeight: '600' }}>Phương thức:</span>{' '}
-                                        {'Thanh toán bằng tiền mặt'}
+                                        {match.params.payment === 'payment-with-online'
+                                            ? 'Thanh toán điện tử'
+                                            : 'Thanh toán bằng tiền mặt'}
                                     </p>
                                 </p>
                             </div>

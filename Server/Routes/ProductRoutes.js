@@ -390,14 +390,10 @@ productRoute.put(
     asyncHandler(async (req, res) => {
         const { name, price, discount, description, category } = req.body;
         const product = await Product.findById(req.params.id);
-        if (price <= 0) {
-            res.status(400);
-            throw new Error('Price or Count in stock is not valid, please correct it and try again');
-        }
         if (product) {
             product.name = name || product.name;
-            product.price = price || product.price;
-            product.discount = discount || product.discount;
+            product.price = price < 0 ? 0 : price || product.price;
+            product.discount = discount < 0 ? 0 : discount || product.discount;
             product.description = description || product.description;
             product.category = category || product.category;
 

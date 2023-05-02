@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import Header from './../components/Header';
 import { PayPalButton } from 'react-paypal-button-v2';
 import { useDispatch, useSelector } from 'react-redux';
@@ -230,7 +230,9 @@ const OrderScreen = ({ match }) => {
                                         <p>
                                             <p>
                                                 <span style={{ fontWeight: '600' }}>Phương thức:</span>{' '}
-                                                {order?.paymentMethod}
+                                                {order?.paymentMethod === 'payment-with-online'
+                                                    ? 'Thanh toán điện tử'
+                                                    : 'Thanh toán bằng tiền mặt'}
                                             </p>
                                         </p>
                                     </div>
@@ -395,13 +397,37 @@ const OrderScreen = ({ match }) => {
                                                 </div>
                                             </div>
                                             <div className="text-center">
-                                                {order?.isPaid ? (
+                                                {order?.receive ? (
                                                     <>
                                                         <p
                                                             className="text-center text-font"
                                                             style={{ color: 'blue', fontWeight: '600' }}
                                                         >
-                                                            Đã thanh toán
+                                                            Đã nhận hàng
+                                                        </p>
+                                                        <span
+                                                            style={{
+                                                                fontSize: '13px',
+                                                                color: 'red',
+                                                                fontWeight: '600',
+                                                            }}
+                                                        >
+                                                            {moment(order?.receiveAt).hours()}
+                                                            {':'}
+                                                            {moment(order?.receiveAt).minutes() < 10
+                                                                ? `0${moment(order?.receiveAt).minutes()}`
+                                                                : moment(order?.receiveAt).minutes()}{' '}
+                                                            {moment(order?.receiveAt).format('DD/MM/YYYY')}{' '}
+                                                        </span>
+                                                    </>
+                                                ) : order?.isPaid ? (
+                                                    <>
+                                                        <p
+                                                            className="text-center text-font"
+                                                            style={{ color: 'blue', fontWeight: '600' }}
+                                                        >
+                                                            Đã thanh toán <br></br>{' '}
+                                                            {order?.isDelivered ? '(đang giao)' : ''}
                                                         </p>
                                                         <span
                                                             style={{
@@ -424,7 +450,7 @@ const OrderScreen = ({ match }) => {
                                                             className="text-center text-font"
                                                             style={{ color: 'red', fontWeight: '600' }}
                                                         >
-                                                            Thanh toán không thành công
+                                                            Giao hàng thất bại
                                                         </p>
                                                         <span
                                                             style={{
@@ -586,7 +612,9 @@ const OrderScreen = ({ match }) => {
                                             >
                                                 <div
                                                     className={
-                                                        order?.isPaid && itemOrder[index].productReview.length === 0
+                                                        order?.isPaid &&
+                                                        order?.receive &&
+                                                        itemOrder[index].productReview.length === 0
                                                             ? 'col-md-1 col-4'
                                                             : 'col-md-2 col-6'
                                                     }
@@ -599,7 +627,9 @@ const OrderScreen = ({ match }) => {
                                                 </div>
                                                 <div
                                                     className={
-                                                        order?.isPaid && itemOrder[index].productReview.length === 0
+                                                        order?.isPaid &&
+                                                        order?.receive &&
+                                                        itemOrder[index].productReview.length === 0
                                                             ? 'col-md-3 col-4 d-flex align-items-center'
                                                             : 'col-md-4 col-6 d-flex align-items-center'
                                                     }
@@ -622,25 +652,27 @@ const OrderScreen = ({ match }) => {
                                                     <h4 style={{ fontWeight: '600', fontSize: '16px' }}>Tổng tiền</h4>
                                                     <h6>{(item.qty * item.price)?.toLocaleString('de-DE')}đ</h6>
                                                 </div>
-                                                {order?.isPaid && itemOrder[index].productReview.length === 0 && (
-                                                    <div className="mt-3 mt-md-0 col-md-2 col-4 align-items-center  d-flex flex-column justify-content-center ">
-                                                        <h4 style={{ fontWeight: '600', fontSize: '16px' }}>
-                                                            Đánh giá
-                                                        </h4>
-                                                        <i
-                                                            class="fal fa-comment-edit fs-4"
-                                                            style={{ cursor: 'pointer' }}
-                                                            type="submit"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#staticBackdrop"
-                                                            onClick={() => {
-                                                                setProduct(item);
-                                                                setProductId(item.product);
-                                                                setOrderItemId(item._id);
-                                                            }}
-                                                        ></i>
-                                                    </div>
-                                                )}
+                                                {order?.isPaid &&
+                                                    order?.receive &&
+                                                    itemOrder[index].productReview.length === 0 && (
+                                                        <div className="mt-3 mt-md-0 col-md-2 col-4 align-items-center  d-flex flex-column justify-content-center ">
+                                                            <h4 style={{ fontWeight: '600', fontSize: '16px' }}>
+                                                                Đánh giá
+                                                            </h4>
+                                                            <i
+                                                                class="fal fa-comment-edit fs-4"
+                                                                style={{ cursor: 'pointer' }}
+                                                                type="submit"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#staticBackdrop"
+                                                                onClick={() => {
+                                                                    setProduct(item);
+                                                                    setProductId(item.product);
+                                                                    setOrderItemId(item._id);
+                                                                }}
+                                                            ></i>
+                                                        </div>
+                                                    )}
                                             </div>
                                         ))}
                                         <div>
@@ -703,6 +735,23 @@ const OrderScreen = ({ match }) => {
                                         </tr>
                                     </tbody>
                                 </table>
+                                {order.paymentMethod === 'payment-with-online' && order?.cancel === 0 && (
+                                    <div className="row" style={{ width: '100%' }}>
+                                        <div className="col-lg-12 " style={{ padding: '10px 0 0 0' }}>
+                                            <a
+                                                href={order?.payment?.payUrl}
+                                                className="btn btn-light col-lg-12 payMomo"
+                                                style={{ marginBottom: '15px' }}
+                                            >
+                                                <img
+                                                    src="/images/momo.png"
+                                                    style={{ height: '45px', width: '45px' }}
+                                                ></img>
+                                                THANH TOÁN MOMO
+                                            </a>
+                                        </div>
+                                    </div>
+                                )}
                                 {
                                     // !order.isPaid && (
                                     //   <div className="col-12">
@@ -722,12 +771,15 @@ const OrderScreen = ({ match }) => {
                                     // )
 
                                     order?.cancel === 1 && (
-                                        <div className="text-white bg-dark p-2 col-12 fs-6 text-center">
+                                        <div
+                                            className="text-white bg-dark p-2 col-12 fs-6 text-center"
+                                            style={{ marginTop: '10px' }}
+                                        >
                                             Đơn hàng này đã bị hủy bỏ
                                         </div>
                                     )
                                 }
-                                {order?.isPaid && order?.completeUser !== true && (
+                                {order?.isPaid && order?.receive && order?.completeUser !== true && (
                                     <div className="col-12 col-sm-12 col-md-12 col-lg-12">
                                         <div className="row">
                                             <button
@@ -738,6 +790,7 @@ const OrderScreen = ({ match }) => {
                                                     borderRadius: '4px',
                                                     fontSize: '17px',
                                                     cursor: 'pointer',
+                                                    height: '50px',
                                                 }}
                                                 onClick={handlerSuccessCart}
                                             >
@@ -755,6 +808,7 @@ const OrderScreen = ({ match }) => {
                                                         borderRadius: '4px',
                                                         fontSize: '17px',
                                                         cursor: 'pointer',
+                                                        height: '50px',
                                                     }}
                                                 >
                                                     Trả hàng
@@ -763,16 +817,18 @@ const OrderScreen = ({ match }) => {
                                         </div>
                                     </div>
                                 )}
-                                {!order?.waitConfirmation && (
-                                    <div className="col-lg-12 " style={{ paddingTop: '25px' }}>
-                                        <button
-                                            onClick={cancelOrderHandler}
-                                            className="btn btn-dark col-12"
-                                            style={{ marginBottom: '15px' }}
-                                            disabled={order?.isPaid || order?.cancel == 1}
-                                        >
-                                            HỦY ĐƠN HÀNG NÀY
-                                        </button>
+                                {order?.cancel === 0 && !order.waitConfirmation && (
+                                    <div className="row" style={{ width: '100%' }}>
+                                        <div className="col-lg-12 " style={{ padding: '10px 0 0 0' }}>
+                                            <button
+                                                onClick={cancelOrderHandler}
+                                                className="btn btn-light col-lg-12"
+                                                style={{ marginBottom: '15px', height: '50px' }}
+                                                disabled={order?.cancel == 1}
+                                            >
+                                                HỦY ĐƠN HÀNG NÀY
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
                             </div>

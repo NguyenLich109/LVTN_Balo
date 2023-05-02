@@ -120,12 +120,16 @@ export default memo(function OrderDeceiveDetailProducts(props) {
                                     Trạng thái:
                                 </dt>
                                 <dd>
-                                    {order?.isDelivered && order?.isPaid ? (
-                                        <span className="badge rounded-pill alert-success">Đã thanh toán</span>
-                                    ) : order?.isDelivered && !order.errorPaid ? (
-                                        <span className="badge alert-success">Đang giao</span>
+                                    {order?.receive ? (
+                                        <span className="badge alert-success">Đã nhận hàng</span>
+                                    ) : order?.isDelivered && order.errorPaid ? (
+                                        <span className="badge alert-danger">Giao hàng thất bại</span>
+                                    ) : order?.isDelivered && order?.isPaid ? (
+                                        <span className="badge rounded-pill alert-success">
+                                            Đã thanh toán {order?.isDelivered ? '(đang giao)' : ''}
+                                        </span>
                                     ) : (
-                                        <span className="badge alert-danger">Thanh toán không thành công</span>
+                                        <span className="badge alert-success">Đang giao</span>
                                     )}
                                 </dd>
                             </dl>

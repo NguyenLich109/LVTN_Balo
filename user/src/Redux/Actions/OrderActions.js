@@ -32,6 +32,8 @@ import {
     ORDER_RETURN_AMOUNT_PRODUCT_REQUEST,
     ORDER_RETURN_AMOUNT_PRODUCT_SUCCESS,
     ORDER_RETURN_AMOUNT_PRODUCT_FAIL,
+    PAY_MOMO_USER_REQUEST,
+    PAY_MOMO_USER_SUCCESS,
 } from '../Constants/OrderConstants';
 import axios from 'axios';
 import { CART_CLEAR_ITEMS } from '../Constants/CartConstants';
@@ -347,6 +349,36 @@ export const returnAmountProduct = (orderItems) => async (dispatch, getState) =>
         }
         dispatch({
             type: ORDER_RETURN_AMOUNT_PRODUCT_FAIL,
+            payload: message,
+        });
+    }
+};
+
+// PAY MOMO
+export const payMomoAction = (values) => async (dispatch, getState) => {
+    try {
+        dispatch({ type: PAY_MOMO_USER_REQUEST });
+
+        const {
+            userLogin: { userInfo },
+        } = getState();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${userInfo.token}`,
+            },
+        };
+
+        const { data } = await axios.post(`/api/orders/${values.id}/payMomo`, { money: values.money }, config);
+        dispatch({ type: PAY_MOMO_USER_SUCCESS, payload: data });
+    } catch (error) {
+        const message = error.response && error.response.data.message ? error.response.data.message : error.message;
+        if (message === 'Not authorized, token failed') {
+            dispatch(logout());
+        }
+        dispatch({
+            type: PAY_MOMO_USER_SUCCESS,
             payload: message,
         });
     }

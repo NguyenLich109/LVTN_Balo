@@ -99,6 +99,13 @@ export default function OrderReceiveDetailmain(props) {
             }
         }
     };
+    const handleReceive = () => {
+        if (!order?.receive) {
+            if (window.confirm('Đồng ý nhận hàng')) {
+                dispatch(paidOrder(order));
+            }
+        }
+    };
     const onHandleErrorPaid = () => {
         if (window.confirm('Đồng ý thanh toán bị hủy')) {
             dispatch(errorPaidOrder(order._id));
@@ -112,8 +119,11 @@ export default function OrderReceiveDetailmain(props) {
         if (order?.isPaid === true) {
             setStatus('Đã thanh toán');
         }
+        if (order?.receive) {
+            setStatus('Đã nhận hàng');
+        }
         if (order?.errorPaid === true) {
-            setStatus('Thanh toán không thành công');
+            setStatus('Giao hàng thất bại');
         }
         return order;
     }, [order]);
@@ -155,17 +165,28 @@ export default function OrderReceiveDetailmain(props) {
                                 Đang giao
                             </button>
                             {order?.isDelivered && (
-                                <button className="dropdown-item" style={{ padding: '5px 0' }} onClick={onHandlePaid}>
-                                    Thanh toán
-                                </button>
+                                <>
+                                    {order?.paymentMethod === 'payment-with-online' ? (
+                                        <button
+                                            className="dropdown-item dropdown-item__padding"
+                                            onClick={handleReceive}
+                                        >
+                                            Nhận hàng
+                                        </button>
+                                    ) : (
+                                        <button className="dropdown-item dropdown-item__padding" onClick={onHandlePaid}>
+                                            Thanh toán và nhận hàng
+                                        </button>
+                                    )}
+                                </>
                             )}
-                            {order?.isDelivered && !order?.isPaid && (
+                            {order?.isDelivered && !order?.receive && (
                                 <button
                                     className="dropdown-item"
                                     style={{ padding: '5px 0' }}
                                     onClick={onHandleErrorPaid}
                                 >
-                                    Thanh toán không thành công
+                                    Giao hàng thất bại
                                 </button>
                             )}
                         </div>

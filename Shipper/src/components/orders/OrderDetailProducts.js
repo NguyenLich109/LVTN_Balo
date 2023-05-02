@@ -101,9 +101,12 @@ const OrderDetailProducts = (props) => {
                                         order?.waitConfirmation &&
                                         order?.isDelivered &&
                                         order?.isPaid &&
+                                        order?.receive &&
                                         order?.completeUser &&
                                         order?.completeAdmin ? (
                                             <span className="badge rounded-pill alert-success">Hoàn tất</span>
+                                        ) : order?.receive ? (
+                                            <span className="badge alert-success">Đã nhận hàng</span>
                                         ) : order?.waitConfirmation && order?.isDelivered && order?.isPaid ? (
                                             <span className="badge alert-success">Đã thanh toán</span>
                                         ) : order?.waitConfirmation && order?.isDelivered ? (

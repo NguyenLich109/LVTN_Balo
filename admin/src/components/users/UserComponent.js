@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -40,6 +40,8 @@ const UserComponent = () => {
     const { loading: updateloading, success: updatesuccess } = updateProfileReduce;
     const giftReduce = useSelector((state) => state.giftReduce);
     const { error: giftError, success: giftSuccess } = giftReduce;
+
+    const [idUser, setIdUser] = useState('');
 
     useEffect(() => {
         dispatch(listUser());
@@ -117,7 +119,7 @@ const UserComponent = () => {
     //hết
     const hendleSend = (data) => {
         if (data) {
-            dispatch(addGiftAction({ id: data.id, gift: data.gift, date: data.date, price: data.price }));
+            dispatch(addGiftAction({ id: idUser, gift: data.gift, date: data.date, price: data.price }));
         }
     };
     return (
@@ -201,6 +203,7 @@ const UserComponent = () => {
                                                     <ModalVolcher
                                                         open={'#exampleModal'}
                                                         hendleSend={hendleSend}
+                                                        handleSaveId={(id) => setIdUser(id)}
                                                         id={user?._id}
                                                     />
                                                 )}

@@ -39,10 +39,19 @@ const orderSchema = mongoose.Schema(
             postalCode: { type: String, required: false },
             country: { type: String, required: true },
         },
+        payment: {
+            signature: { type: String },
+            moneyPay: { type: String },
+            timePay: { type: String },
+            partner: { type: String },
+            message: { type: String },
+            payUrl: { type: String },
+        },
         paymentMethod: {
             type: String,
             required: true,
-            default: 'Payment in cash',
+            enum: ['payment-with-cash', 'payment-with-online'],
+            default: 'payment-with-cash',
         },
         paymentResult: {
             id: { type: String },
@@ -125,6 +134,15 @@ const orderSchema = mongoose.Schema(
         email: {
             type: String,
             require: true,
+        },
+        receive: {
+            type: Boolean,
+            required: true,
+            default: false,
+        },
+
+        receiveAt: {
+            type: Date,
         },
         errorPaid: {
             type: Boolean,

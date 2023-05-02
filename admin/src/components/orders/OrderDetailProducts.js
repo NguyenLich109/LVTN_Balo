@@ -142,16 +142,21 @@ const OrderDetailProducts = (props) => {
                                         order?.waitConfirmation &&
                                         order?.isDelivered &&
                                         order?.isPaid &&
+                                        order?.receive &&
                                         order?.completeUser &&
                                         order?.completeAdmin &&
                                         order?.isGuarantee ? (
                                             <span className="badge alert-warning">Bảo hành sản phẩm</span>
                                         ) : order?.completeAdmin ? (
                                             <span className="badge rounded-pill alert-success">Hoàn tất</span>
-                                        ) : order?.waitConfirmation && order?.isDelivered && order?.isPaid ? (
-                                            <span className="badge alert-success">Đã thanh toán</span>
+                                        ) : order?.receive ? (
+                                            <span className="badge alert-success">Đã nhận hàng</span>
                                         ) : order?.errorPaid && order?.waitConfirmation && order?.isDelivered ? (
-                                            <span className="badge alert-danger">Thanh toán không thành công</span>
+                                            <span className="badge alert-danger">Giao hàng thất bại</span>
+                                        ) : order?.waitConfirmation && order?.isDelivered && order?.isPaid ? (
+                                            <span className="badge alert-success">
+                                                Đã thanh toán {order?.isDelivered ? '(đang giao)' : ''}
+                                            </span>
                                         ) : order?.waitConfirmation && order?.isDelivered ? (
                                             <span className="badge alert-warning">Đang giao</span>
                                         ) : order?.waitConfirmation ? (

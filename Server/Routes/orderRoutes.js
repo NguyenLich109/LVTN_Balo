@@ -5,6 +5,8 @@ import Product from '../Models/ProductModel.js';
 import Order from './../Models/OrderModel.js';
 import OrderNv from './../Models/OrderNvModel.js';
 import xlsx from 'xlsx';
+import createRequestBody from '../utils/payMomo.js';
+import axios from 'axios';
 
 const orderRouter = express.Router();
 
@@ -77,6 +79,63 @@ orderRouter.post(
             }
             const createOrder = await order.save();
             res.status(201).json(createOrder);
+        }
+    }),
+);
+
+orderRouter.post(
+    '/:id/payMomo',
+    protect,
+    asyncHandler(async (req, res) => {
+        const id = req.params.id;
+        const { money } = req.body;
+        const order = await Order.findById(id);
+        const { requestBody, signature } = createRequestBody(
+            `${id}`,
+            'Thanh toán điện tự với Balostore',
+            `${money}`,
+            `${process.env.URL_CLIENT}/order/${id}`,
+            `${process.env.URL_SERVER}/api/orders/${id}/notificationPay`,
+        );
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(requestBody),
+            },
+        };
+        const { data } = await axios.post('https://test-payment.momo.vn/v2/gateway/api/create', requestBody, config);
+        if (data) {
+            order.payment.payUrl = data.payUrl;
+            order.payment.signature = signature;
+            order.payment.moneyPay = money;
+
+            order.save();
+        }
+        res.status(200).json(data);
+    }),
+);
+
+orderRouter.post(
+    '/:id/notificationPay',
+    asyncHandler(async (req, res) => {
+        const { message } = req.body;
+        const order = await Order.findById(req.params.id);
+
+        if (message == 'Successful.') {
+            order.payment.timePay = new Date().getTime();
+            order.payment.partner = 'MOMO';
+            order.payment.message = 'Thành Công';
+            order.isPaid = true;
+            order.paidAt = new Date().getTime();
+            order.waitConfirmation = true;
+            order.waitConfirmationAt = new Date().getTime();
+
+            order.save();
+        } else {
+            order.cancel = 1;
+            order.payment.message = 'error';
+
+            order.save();
         }
     }),
 );
@@ -278,12 +337,22 @@ orderRouter.get(
 
 orderRouter.get(
     '/complete',
-    // protect,
-    // admin,
+    protect,
+    admin,
     asyncHandler(async (req, res) => {
-        const orders = await Order.find({ completeAdmin: true }).sort({ _id: -1 });
+        const allorder = [];
+        const orders = await Order.find({ isPaid: true }).sort({ _id: -1 });
         if (orders) {
-            res.json(orders);
+            orders.forEach((order) => {
+                if (order.completeAdmin) {
+                    allorder.push(order);
+                } else {
+                    if (order.isPaid && order.paymentMethod == 'payment-with-online') {
+                        allorder.push(order);
+                    }
+                }
+            });
+            res.send(allorder);
         }
     }),
 );
@@ -360,12 +429,6 @@ orderRouter.put(
                 update_time: req.body.update_time,
                 email_address: req.body.email_address,
             };
-            // order.orderItems.map((orderItem)=>{
-            // const product = await Product.findById(orderItem.product);
-            // if(product){
-            //     product.numberOfOrder += orderItem.qty;
-            //     const updatedProduct = await Product.save();}
-            // })
             const updatedOrder = await order.save();
             res.json(updatedOrder);
         } else {
@@ -475,6 +538,11 @@ orderRouter.put(
                     idOrder: order._id,
                 });
 
+                if (order.paymentMethod == 'payment-with-online') {
+                    createOrder.isPaid = order.isPaid;
+                    createOrder.isPaidAt = order.isPaidAt;
+                }
+
                 const retult = await createOrder.save();
                 const updatedOrder = await order.save();
                 res.json(updatedOrder);
@@ -514,14 +582,21 @@ orderRouter.put(
     protect,
     asyncHandler(async (req, res) => {
         const order = await Order.findById(req.params.id);
-
         if (order) {
-            order.isPaid = true;
-            order.paidAt = Date.now();
-            order.errorPaid = false;
-            order.errorPaidAt = Date.now();
-            order.content = '';
-
+            if (order.paymentMethod == 'payment-with-online') {
+                order.receive = true;
+                order.receiveAt = Date.now();
+                order.errorPaid = false;
+                order.errorPaidAt = Date.now();
+            } else {
+                order.isPaid = true;
+                order.paidAt = Date.now();
+                order.errorPaid = false;
+                order.errorPaidAt = Date.now();
+                order.receive = true;
+                order.receiveAt = Date.now();
+                order.content = '';
+            }
             const updatedOrder = await order.save();
             res.json(updatedOrder);
         } else {
@@ -541,16 +616,31 @@ orderRouter.put(
         if (orderNv) {
             const order = await Order.findOne({ _id: orderNv.idOrder });
             if (order) {
-                order.isPaid = true;
-                order.paidAt = Date.now();
-                order.errorPaid = false;
-                order.errorPaidAt = Date.now();
-                order.content = '';
-                orderNv.isPaid = true;
-                orderNv.paidAt = Date.now();
-                orderNv.errorPaid = false;
-                orderNv.errorPaidAt = Date.now();
-                orderNv.content = '';
+                if (order.paymentMethod == 'payment-with-online') {
+                    order.receive = true;
+                    order.receiveAt = Date.now();
+                    order.errorPaid = false;
+                    order.errorPaidAt = Date.now();
+                    orderNv.receive = true;
+                    orderNv.receiveAt = Date.now();
+                    orderNv.errorPaid = false;
+                    orderNv.errorPaidAt = Date.now();
+                } else {
+                    order.isPaid = true;
+                    order.paidAt = Date.now();
+                    order.errorPaid = false;
+                    order.errorPaidAt = Date.now();
+                    order.content = '';
+                    orderNv.isPaid = true;
+                    orderNv.paidAt = Date.now();
+                    orderNv.errorPaid = false;
+                    orderNv.errorPaidAt = Date.now();
+                    order.receive = true;
+                    order.receiveAt = Date.now();
+                    orderNv.receive = true;
+                    orderNv.receiveAt = Date.now();
+                    orderNv.content = '';
+                }
 
                 const updateOrderNv = await orderNv.save();
                 const updatedOrder = await order.save();
@@ -572,7 +662,7 @@ orderRouter.put(
     protect,
     asyncHandler(async (req, res) => {
         const errorOrder = await Order.findById(req.params.id);
-        if (!errorOrder.isPaid) {
+        if (!errorOrder.receive) {
             errorOrder.errorPaid = true;
             errorOrder.errorPaidAt = Date.now();
 
@@ -594,7 +684,7 @@ orderRouter.put(
 
         if (errorOrderNv) {
             const errorOrder = await Order.findOne({ _id: errorOrderNv.idOrder });
-            if (!errorOrder.isPaid) {
+            if (!errorOrder.receive) {
                 errorOrder.errorPaid = true;
                 errorOrder.errorPaidAt = Date.now();
                 errorOrderNv.errorPaid = true;
@@ -801,17 +891,19 @@ orderRouter.post(
                         ? value.waitConfirmation &&
                           value.isDelivered &&
                           value.isPaid &&
+                          value.receive &&
                           value.completeUser &&
                           value.completeAdmin &&
                           value.isGuarantee
                             ? ((status = 'Bảo hành sản phẩm'), (time2 = new Date(value.isGuaranteeAt).toLocaleString()))
                             : value.completeAdmin
                             ? ((status = 'Hoàn tất'), (time2 = new Date(value.completeAdminAt).toLocaleString()))
+                            : value.receive
+                            ? ((status = 'Đã nhận hàng'), (time2 = new Date(value.receiveAt).toLocaleString()))
                             : value.waitConfirmation && value.isDelivered && value.isPaid
                             ? ((status = 'Đã thanh toán'), (time2 = new Date(value.paidAt).toLocaleString()))
                             : value.errorPaid && value.waitConfirmation && value.isDelivered
-                            ? ((status = 'Thanh toán không thành công'),
-                              (time2 = new Date(value.errorPaidAt).toLocaleString()))
+                            ? ((status = 'Giao hàng thất bại'), (time2 = new Date(value.errorPaidAt).toLocaleString()))
                             : value.waitConfirmation && value.isDelivered
                             ? ((status = 'Đang giao'), (time2 = new Date(value.deliveredAt).toLocaleString()))
                             : value.waitConfirmation

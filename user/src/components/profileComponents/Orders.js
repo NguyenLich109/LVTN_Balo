@@ -61,6 +61,7 @@ const Orders = (props) => {
                                                     order?.waitConfirmation &&
                                                     order?.isDelivered &&
                                                     order?.isPaid &&
+                                                    order?.receive &&
                                                     order?.completeUser &&
                                                     order?.completeAdmin &&
                                                     order?.isGuarantee ? (
@@ -77,14 +78,15 @@ const Orders = (props) => {
                                                         >
                                                             Hoàn tất
                                                         </span>
-                                                    ) : order?.waitConfirmation &&
-                                                      order?.isDelivered &&
-                                                      order?.isPaid ? (
+                                                    ) : order?.receive &&
+                                                      order?.isPaid &&
+                                                      order?.waitConfirmation &&
+                                                      order?.isDelivered ? (
                                                         <span
                                                             className="fs-6 text-success"
                                                             style={{ fontWeight: '600' }}
                                                         >
-                                                            Đã thanh toán
+                                                            Đã nhận hàng
                                                         </span>
                                                     ) : order?.errorPaid &&
                                                       order?.waitConfirmation &&
@@ -93,7 +95,16 @@ const Orders = (props) => {
                                                             className="fs-6 text-danger"
                                                             style={{ fontWeight: '600' }}
                                                         >
-                                                            Thanh toán không thành công
+                                                            Giao hàng thất bại
+                                                        </span>
+                                                    ) : order?.waitConfirmation &&
+                                                      order?.isDelivered &&
+                                                      order?.isPaid ? (
+                                                        <span
+                                                            className="fs-6 text-success"
+                                                            style={{ fontWeight: '600' }}
+                                                        >
+                                                            Đã thanh toán {order?.isDelivered ? '(đang giao)' : ''}
                                                         </span>
                                                     ) : order?.waitConfirmation && order?.isDelivered ? (
                                                         <span

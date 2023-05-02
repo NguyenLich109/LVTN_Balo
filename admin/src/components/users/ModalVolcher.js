@@ -4,7 +4,7 @@ import { getDiscountAction } from '../../Redux/Actions/DiscountActions';
 import './index.css';
 
 export default memo(function ModalVolcher(data) {
-    const { open, hendleSend, id } = data;
+    const { open, hendleSend, handleSaveId, id } = data;
     const dispatch = useDispatch();
 
     const getDiscountReduce = useSelector((state) => state.getDiscountReduce);
@@ -20,7 +20,13 @@ export default memo(function ModalVolcher(data) {
 
     return (
         <>
-            <span type="button" className="btn btn-light" data-toggle="modal" data-target={open}>
+            <span
+                type="button"
+                className="btn btn-light"
+                data-toggle="modal"
+                data-target={open}
+                onClick={() => handleSaveId(id)}
+            >
                 <i className="fas fa-gift"></i>
             </span>
 
@@ -89,7 +95,7 @@ export default memo(function ModalVolcher(data) {
                             <button
                                 type="button"
                                 className="btn btn-success"
-                                onClick={() => hendleSend({ id, gift, date, price })}
+                                onClick={() => hendleSend({ gift, date, price })}
                             >
                                 Gửi
                             </button>

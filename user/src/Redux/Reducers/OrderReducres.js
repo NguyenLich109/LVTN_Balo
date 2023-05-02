@@ -40,6 +40,10 @@ import {
     ORDER_RETURN_AMOUNT_PRODUCT_SUCCESS,
     ORDER_RETURN_AMOUNT_PRODUCT_FAIL,
     ORDER_RETURN_AMOUNT_PRODUCT_RESET,
+    PAY_MOMO_USER_REQUEST,
+    PAY_MOMO_USER_SUCCESS,
+    PAY_MOMO_USER_FAIL,
+    PAY_MOMO_USER_RESET,
 } from '../Constants/OrderConstants';
 
 // CREATE ORDER
@@ -204,6 +208,21 @@ export const returnAmountProductReducer = (state = {}, action) => {
         case ORDER_RETURN_AMOUNT_PRODUCT_FAIL:
             return { loading: false, error: action.payload };
         case ORDER_RETURN_AMOUNT_PRODUCT_RESET:
+            return {};
+        default:
+            return state;
+    }
+};
+
+export const payMomoReducer = (state = {}, action) => {
+    switch (action.type) {
+        case PAY_MOMO_USER_REQUEST:
+            return { loading: true };
+        case PAY_MOMO_USER_SUCCESS:
+            return { loading: false, success: true, payItems: action.payload };
+        case PAY_MOMO_USER_FAIL:
+            return { loading: false, error: action.payload };
+        case PAY_MOMO_USER_RESET:
             return {};
         default:
             return state;

@@ -107,9 +107,14 @@ const AddProductMain = () => {
                 msg.borderRed3 = 'border-red';
             }
         }
-        if (isEmpty(discount)) {
+        if (isEmpty(discount.toString())) {
             msg.discount = 'Vui lòng nhập nhập mã giảm giá';
             msg.borderRed4 = 'border-red';
+        } else {
+            if (discount < 0) {
+                msg.discount = 'Vui lòng nhập giá trị dương';
+                msg.borderRed4 = 'border-red';
+            }
         }
         if (isEmpty(description)) {
             msg.description = 'Vui lòng nhập mô tả sản phẩm';

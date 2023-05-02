@@ -65,7 +65,7 @@ const MainOrders = (props) => {
                             <select className="form-select" value={status} onChange={handleStatus}>
                                 <option value={'3'}>Đang giao</option>
                                 <option value={'4'}>Thanh toán</option>
-                                <option value={'7'}>Thanh toán không thành công</option>
+                                <option value={'7'}>Giao hàng thất bại</option>
                             </select>
                         </div>
                     </div>
@@ -94,7 +94,11 @@ const MainOrders = (props) => {
                                     <td>
                                         {order.isPaid ? (
                                             <span className="badge rounded-pill alert-success">
-                                                Thanh toán {moment(order?.paidAt).hours()}
+                                                Thanh toán{' '}
+                                                {order?.paymentMethod === 'payment-with-online'
+                                                    ? 'điện tử'
+                                                    : 'tiền mặt'}{' '}
+                                                {moment(order?.paidAt).hours()}
                                                 {':'}
                                                 {moment(order?.paidAt).minutes() < 10
                                                     ? `0${moment(order?.paidAt).minutes()}`
@@ -102,9 +106,7 @@ const MainOrders = (props) => {
                                                 {moment(order?.paidAt).format('DD/MM/YYYY')}{' '}
                                             </span>
                                         ) : order.errorPaid ? (
-                                            <span className="badge rounded-pill alert-danger">
-                                                Thanh toán không thành công
-                                            </span>
+                                            <span className="badge rounded-pill alert-danger">Giao hàng thất bại</span>
                                         ) : (
                                             <span className="badge rounded-pill alert-danger">Chờ thanh toán</span>
                                         )}
@@ -118,12 +120,14 @@ const MainOrders = (props) => {
                                         {moment(order?.createdAt).format('DD/MM/YYYY')}{' '}
                                     </td>
                                     <td>
-                                        {order?.isDelivered && order?.isPaid ? (
+                                        {order?.receive ? (
+                                            <span className="badge rounded-pill alert-success">Đã nhận hàng</span>
+                                        ) : order?.isDelivered && order?.isPaid ? (
                                             <span className="badge rounded-pill alert-success">Đã thanh toán</span>
                                         ) : order?.isDelivered && !order.errorPaid ? (
                                             <span className="badge alert-success">Đang giao</span>
                                         ) : (
-                                            <span className="badge alert-danger">Thanh toán không thành công</span>
+                                            <span className="badge alert-danger">Giao hàng thất bại</span>
                                         )}
                                     </td>
                                     <td className="d-flex justify-content-end align-item-center">

@@ -91,10 +91,13 @@ const OrderDetailmain = (props) => {
             setStatus('Giao hàng');
         }
         if (order?.isPaid === true && order?.completeAdmin !== true) {
-            setStatus('Thanh toán');
+            setStatus('Đã thanh toán');
+        }
+        if (order?.isPaid === true && order?.receive === true) {
+            setStatus('Đã nhận hàng');
         }
         if (order?.errorPaid === true && order?.completeAdmin !== true) {
-            setStatus('Thanh toán không thành công');
+            setStatus('Giao hàng thất bại');
         }
         if (order?.completeAdmin === true) {
             setStatus('Hoàn tất');
@@ -124,8 +127,15 @@ const OrderDetailmain = (props) => {
         }
     };
     const handlePaid = () => {
-        if (order?.isPaid !== true) {
+        if (!order?.isPaid) {
             if (window.confirm('Đồng ý thanh toán')) {
+                dispatch(paidOrder(order));
+            }
+        }
+    };
+    const handleReceive = () => {
+        if (!order?.receive) {
+            if (window.confirm('Đồng ý nhận hàng')) {
                 dispatch(paidOrder(order));
             }
         }
@@ -225,16 +235,30 @@ const OrderDetailmain = (props) => {
                                     </button>
                                 )}
                                 {order?.isDelivered && (
-                                    <button className="dropdown-item dropdown-item__padding" onClick={handlePaid}>
-                                        Thanh toán
-                                    </button>
+                                    <>
+                                        {order?.paymentMethod === 'payment-with-online' ? (
+                                            <button
+                                                className="dropdown-item dropdown-item__padding"
+                                                onClick={handleReceive}
+                                            >
+                                                Nhận hàng
+                                            </button>
+                                        ) : (
+                                            <button
+                                                className="dropdown-item dropdown-item__padding"
+                                                onClick={handlePaid}
+                                            >
+                                                Thanh toán và nhận hàng
+                                            </button>
+                                        )}
+                                    </>
                                 )}
-                                {order?.isDelivered && !order?.isPaid && (
+                                {order?.isDelivered && !order?.receive && (
                                     <button className="dropdown-item dropdown-item__padding" onClick={handleErrorPaid}>
-                                        Thanh toán không thành công
+                                        Giao hàng thất bại
                                     </button>
                                 )}
-                                {order?.isPaid && (
+                                {order?.receive && (
                                     <button className="dropdown-item dropdown-item__padding" onClick={handleSuccess}>
                                         Hoàn tất
                                     </button>

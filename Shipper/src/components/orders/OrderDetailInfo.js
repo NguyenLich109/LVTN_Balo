@@ -38,7 +38,12 @@ const OrderDetailInfo = (props) => {
                         <i className="text-success fab fa-paypal"></i>
                     </span>
                     <div className="text">
-                        <p className="mb-1">Phương thức: {order.paymentMethod}</p>
+                        <p className="mb-1">
+                            Phương thức:{' '}
+                            {order.paymentMethod === 'payment-with-online'
+                                ? 'Thanh toán điện tử'
+                                : 'Thanh toán bằng tiền mặt'}
+                        </p>
                     </div>
                 </article>
             </div>

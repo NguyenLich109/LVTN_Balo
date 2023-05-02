@@ -1,4 +1,4 @@
-import { React, useEffect } from 'react';
+import { React, useEffect, useState } from 'react';
 import TopTotal from './TopTotal';
 import LatestOrder from './LatestOrder';
 import SaleStatistics from './SalesStatistics';
@@ -25,6 +25,7 @@ const Main = () => {
         dispatch(listProducts());
         dispatch(getOrderCompleteAll());
     }, [dispatch]);
+
     return (
         <>
             <section className="content-main">

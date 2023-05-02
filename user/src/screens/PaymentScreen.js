@@ -12,14 +12,16 @@ const PaymentScreen = ({ history }) => {
         history.push('/shipping');
     }
 
-    const [paymentMethod, setPaymentMethod] = useState('Thanh toán bằng tiền mặt');
+    const [paymentMethod, setPaymentMethod] = useState('');
 
     const dispatch = useDispatch();
 
     const submitHandler = (e) => {
         e.preventDefault();
-        dispatch(savePaymentMethod(paymentMethod));
-        history.push('/placeorder');
+        if (paymentMethod) {
+            dispatch(savePaymentMethod(paymentMethod));
+            history.push(`/placeorder/${paymentMethod}`);
+        }
     };
     return (
         <>
@@ -32,14 +34,31 @@ const PaymentScreen = ({ history }) => {
                             <input
                                 className="form-check-input"
                                 type="radio"
-                                checked
-                                value={paymentMethod}
+                                name="payment"
+                                value="payment-with-cash"
                                 onChange={(e) => {
                                     setPaymentMethod(e.target.value);
-                                    console.log(e.target.value);
+                                }}
+                                id="one"
+                            />
+                            <label htmlFor="one" className="form-check-label">
+                                Thanh toán bằng tiền mặt
+                            </label>
+                        </div>
+                        <div className="radio-container">
+                            <input
+                                className="form-check-input"
+                                type="radio"
+                                name="payment"
+                                value="payment-with-online"
+                                id="two"
+                                onChange={(e) => {
+                                    setPaymentMethod(e.target.value);
                                 }}
                             />
-                            <label className="form-check-label">Thanh toán bằng tiền mặt</label>
+                            <label htmlFor="two" className="form-check-label">
+                                Thanh toán điện tử
+                            </label>
                         </div>
                     </div>
 
