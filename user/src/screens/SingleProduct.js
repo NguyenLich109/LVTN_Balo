@@ -302,9 +302,11 @@ const SingleProduct = ({ history, match }) => {
                                                             className="corousel-price"
                                                             style={{ color: 'black', fontSize: '18px' }}
                                                         >
-                                                            {(
-                                                                (product?.price * (100 - product?.discount)) /
-                                                                100
+                                                            {Number(
+                                                                (
+                                                                    (product?.price * (100 - product?.discount)) /
+                                                                    100
+                                                                ).toFixed(),
                                                             ).toLocaleString('de-DE')}
                                                             đ
                                                         </p>

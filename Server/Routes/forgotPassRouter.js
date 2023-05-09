@@ -1,106 +1,114 @@
 import express from 'express';
-import asyncHandler from 'express-async-handler';
-import multer from 'multer';
-import path from 'path';
-// forgot email
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
-// UserInFo
-// import UserInFor from '../Models/userDetails.js';
 import User from '../Models/UserModel.js';
-
-import mongoose from 'mongoose';
+import asyncHandler from 'express-async-handler';
+import { SendMail } from '../utils/nodemailler.js';
 
 const forgotPassRouter = express.Router();
 
-const JWT_SECRET1 = 'baloshop';
 // nhập mail, gửi link thay đổi mật khẩu
-forgotPassRouter.post('/forgotPassword', async (req, res) => {
-    const { email } = req.body;
-    try {
-        const oldUser = await User.findOne({ email });
-        if (!oldUser) {
-            return res.json({ status: 'Email chưa được đăng ký, vui lòng kiểm tra lại' });
-        }
-        const secret = JWT_SECRET1 + oldUser.password;
-        const token1 = jwt.sign({ email: oldUser.email, id: oldUser._id }, secret, {
-            expiresIn: '1m',
-        });
-        const link = `http://localhost:5000/api/forgotPass/reset-password/${oldUser._id}/${token1}`;
-        var transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: 'balostore.owner@gmail.com',
-                pass: 'ytmgtsqgkgtypwle',
-            },
-        });
+forgotPassRouter.post(
+    '/forgotPassword',
+    asyncHandler(async (req, res) => {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            res.status(404);
+            throw new Error('Tài khoản không tồn tại');
+        } else {
+            const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+                expiresIn: '60m',
+            });
 
-        var mailOptions = {
-            from: 'balostore.owner@gmail.com',
-            to: oldUser.email,
-            subject: 'BaloStore kính chào quý khách, quý khách hãy nhấp vào đường link bên dưới để đặt lại mật khẩu',
-            text: link,
-        };
+            user.resetPasswordToken = token;
+            const save = await user.save();
+            if (save) {
+                const url = `${process.env.URL_CLIENT}/updatePass/${email}`;
+                const html = `
+                 <div style = "margin-left: 22.5%; font-size: 17px">
+                    <div style = "width: 514px;
+                        padding: 20px;
+                        margin: 28px;
+                        border: #e1e4e8 solid 1px;
+                        border-radius: 8px">
+                    <div style = "text-align: center;">
+                        <img src="https://res.cloudinary.com/dwl3ckysm/image/upload/v1683440613/Logo/logo2_bbfutm.png"
+                        style ="height: 100px">
+                    </div>
+                    <p style = "margin-left : 33%;
+                        font-size: 20px;
+                        font-weight: 600;
+                        margin:5px 0;
+                        text-align: center
+                        ">
+                    Thiết lập lại mật khẩu
+                    </p>
+                    <p>Xin chào ${user.name}</p>
+                    <p>Chúng tôi nhận được yêu cầu thiết lập lại mật khẩu cho tài khoản BaloStore của bạn. Vui lòng sử dụng nút sau để đặt lại  mật khẩu của bạn </p>
+                    <a href="${url}" target="_blank"
+                    style = "text-decoration: none; margin-left: 32.5%;">
+                    <button style = "background-color: #4ac4fa;
+                        padding: 18px 30px;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 17px">
+                        Đặt lại mật khẩu
+                    </button>
+                    </a>
+                    <p>Nếu bạn không sử dụng liên kết này trong vòng 1 giờ, liên kết này sẽ hết hạn.</p>
+                    <p style="margin:5px 0">Trân trọng</p>
+                    <p style="margin:5px 0">BaloStore</p>
+                </div>
+            </div>`;
 
-        transporter.sendMail(mailOptions, function (error, info) {
-            if (error) {
-                console.log(error);
-            } else {
-                console.log('Email sent: ' + info.response);
+                const messageOptions = {
+                    recipient: email,
+                    subject: 'Đặt lại mật khẩu',
+                    html: html,
+                };
+
+                //send verify email
+                try {
+                    await SendMail(messageOptions);
+                    res.status(200);
+                    res.json('Link đặt lại mật khẩu đã được gửi qua email, vui lòng kiểm tra hòm thư của bạn');
+                } catch (error) {
+                    res.status(400);
+                    throw new Error(error);
+                }
             }
-        });
-        res.json({ status: 'Link đặt lại mật khẩu đã được gửi qua email, vui lòng kiểm tra hòm thư của bạn' });
-        console.log(link);
-    } catch (error) {}
-});
+        }
+    }),
+);
 
-//   gọi api thay đổi mật khẩu
-forgotPassRouter.get('/reset-password/:id/:token1', async (req, res) => {
-    const { id, token1 } = req.params;
-    // console.log(req.params);
-    const oldUser = await User.findOne({ _id: id });
-    if (!oldUser) {
-        return res.json({ status: 'User Not Exists!!' });
-    }
-    const secret = JWT_SECRET1 + oldUser.password;
-    try {
-        const verify = jwt.verify(token1, secret);
-        res.render('index', { email: verify.email, status: 'Not verified' });
-        //res.send(verify);
-    } catch (error) {
-        console.log(error);
-        res.send('not verified');
-    }
-});
-forgotPassRouter.post('/reset-password/:id/:token', async (req, res) => {
-    const { id, token } = req.params;
-    const { password } = req.body;
-
-    const oldUser = await User.findOne({ _id: id });
-    if (!oldUser) {
-        return res.json({ status: 'User Not Exists!!' });
-    }
-    const secret = JWT_SECRET1 + oldUser.password;
-    try {
-        const verify = jwt.verify(token, secret);
-        const encryptedPassword = await bcrypt.hash(password, 10);
-        await User.updateOne(
-            {
-                _id: id,
-            },
-            {
-                $set: {
-                    password: encryptedPassword,
-                },
-            },
-        );
-        // res.json({ status: "Password updated" });
-        res.render('index', { email: verify.email, status: 'verified' });
-    } catch (error) {
-        console.log(error);
-        res.json({ status: 'Something Went Wrong' });
-    }
-});
+forgotPassRouter.post(
+    '/resetPassword/:email',
+    asyncHandler(async (req, res) => {
+        const { email } = req.params;
+        const { password } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            res.status(404);
+            throw new Error('Tài khoản này không tồn tại!');
+        }
+        try {
+            const verify = jwt.verify(user.resetPasswordToken, process.env.JWT_SECRET);
+            if (verify) {
+                user.password = password;
+                user.resetPasswordToken = null;
+                const save = await user.save();
+                if (save) {
+                    res.status(200);
+                    res.json('Mật khẩu đã được thay đổi');
+                }
+            }
+        } catch (error) {
+            res.status(400);
+            throw new Error('Thời gian đã hết hạn hoặc bạn đã cập nhật mật khẩu');
+        }
+    }),
+);
 
 export default forgotPassRouter;

@@ -60,16 +60,31 @@ export default function OfferProduct(data) {
                     <Slider {...settings}>
                         {products?.map((product, index) => {
                             return (
-                                <div key={index} className="corousel-div border-product" style={{ maxHeight: '300px' }}>
+                                <div key={index} className="corousel-div border-product">
                                     <Link to={`/products/${product._id}`} className="corousel-link">
-                                        <img
-                                            src={`/productImage/${product?.optionColor[0]?.image}`}
-                                            className="corousel-img"
-                                        ></img>
-                                        <p className="corousel-noti">{product?.name}</p>
-                                        <p className="corousel-price">{product?.price?.toLocaleString('de-DE')}đ</p>
+                                        <div className="product-postion">
+                                            <img
+                                                src={`/productImage/${product?.optionColor[0]?.image}`}
+                                                className="corousel-img"
+                                            ></img>
+                                            {product?.discount > 0 ? <span>-{product?.discount}%</span> : ''}
+                                        </div>
+                                        <p className="corousel-noti">{product.name}</p>
+                                        <div className="d-flex justify-content-center">
+                                            {product?.discount !== 0 && (
+                                                <p className="corousel-price text-none">
+                                                    {product?.price?.toLocaleString('de-DE')}đ
+                                                </p>
+                                            )}
+                                            <p className="corousel-price">
+                                                {Number(
+                                                    ((product?.price * (100 - product?.discount)) / 100).toFixed(),
+                                                ).toLocaleString('de-DE')}
+                                                đ
+                                            </p>
+                                        </div>
                                         <div className="corousel-rating">
-                                            <Rating value={product?.rating} text={`(${product?.numReviews})`} />
+                                            <Rating value={product.rating} text={`(${product.numReviews})`} />
                                         </div>
                                     </Link>
                                 </div>

@@ -21,6 +21,9 @@ import {
     createUserReducer,
     getGiftReducer,
     addGiftReducer,
+    updatePassReducer,
+    sendEmailReducer,
+    verifyEmailReducer,
 } from './Reducers/userReducers';
 import {
     orderAddressMyReducer,
@@ -61,6 +64,9 @@ const reducer = combineReducers({
     userDetails: userDetailsReducer,
     userUpdateProfile: userUpdateProfileReducer,
     userAll: userListReducer,
+    verifyEmailReducer,
+    sendEmailReducer,
+    updatePassReducer,
     getGiftReducer,
     addGiftReducer,
     orderCreate: orderCreateReducer,

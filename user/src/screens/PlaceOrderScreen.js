@@ -59,7 +59,7 @@ const PlaceOrderScreen = ({ history, match }) => {
                 color: pro.color,
                 qty: pro.qty,
                 image: pro.image,
-                price: (pro.product?.price * (100 - pro.product?.discount)) / 100,
+                price: Number(((pro.product?.price * (100 - pro.product?.discount)) / 100).toFixed()),
                 product: pro.product._id,
             });
             return arr;
@@ -194,9 +194,9 @@ const PlaceOrderScreen = ({ history, match }) => {
                 <div className="mt-3 mt-md-0 col-md-2 col-4 align-items-end  d-flex flex-column justify-content-center ">
                     <h4 style={{ fontWeight: '600', fontSize: '16px' }}>Giá</h4>
                     <h6>
-                        {(item?.qty * ((item?.product?.price * (100 - item?.product?.discount)) / 100))?.toLocaleString(
-                            'de-DE',
-                        )}
+                        {Number(
+                            (item?.qty * ((item?.product?.price * (100 - item?.product?.discount)) / 100)).toFixed(),
+                        ).toLocaleString('de-DE')}
                         đ
                     </h6>
                 </div>

@@ -30,6 +30,18 @@ import {
     ADD_GIFT_SUCCESS,
     ADD_GIFT_FAIL,
     ADD_GIFT_RESET,
+    VERIFY_EMAIL_REQUEST,
+    VERIFY_EMAIL_SUCCESS,
+    VERIFY_EMAIL_FAIL,
+    VERIFY_EMAIL_RESET,
+    SEND_EMAIL_RESET_REQUEST,
+    SEND_EMAIL_RESET_SUCCESS,
+    SEND_EMAIL_RESET_FAIL,
+    SEND_EMAIL_RESET_RESET,
+    UPDATE_PASS_EMAIL_RESET_REQUEST,
+    UPDATE_PASS_EMAIL_RESET_SUCCESS,
+    UPDATE_PASS_EMAIL_RESET_FAIL,
+    UPDATE_PASS_EMAIL_RESET_RESET,
 } from '../Constants/UserContants';
 
 // LOGIN
@@ -152,6 +164,54 @@ export const addGiftReducer = (state = [], action) => {
         case ADD_GIFT_FAIL:
             return { loading: false, error: action.payload };
         case ADD_GIFT_RESET:
+            return {};
+        default:
+            return state;
+    }
+};
+
+// VERIFY EMAIL
+export const verifyEmailReducer = (state = [], action) => {
+    switch (action.type) {
+        case VERIFY_EMAIL_REQUEST:
+            return { loading: true };
+        case VERIFY_EMAIL_SUCCESS:
+            return { loading: false, success: true, status: action.payload };
+        case VERIFY_EMAIL_FAIL:
+            return { loading: false, error: action.payload };
+        case VERIFY_EMAIL_RESET:
+            return {};
+        default:
+            return state;
+    }
+};
+
+// VERIFY EMAIL
+export const sendEmailReducer = (state = [], action) => {
+    switch (action.type) {
+        case SEND_EMAIL_RESET_REQUEST:
+            return { loading: true };
+        case SEND_EMAIL_RESET_SUCCESS:
+            return { loading: false, success: true, status: action.payload };
+        case SEND_EMAIL_RESET_FAIL:
+            return { loading: false, error: action.payload };
+        case SEND_EMAIL_RESET_RESET:
+            return {};
+        default:
+            return state;
+    }
+};
+
+// VERIFY EMAIL
+export const updatePassReducer = (state = [], action) => {
+    switch (action.type) {
+        case UPDATE_PASS_EMAIL_RESET_REQUEST:
+            return { loading: true };
+        case UPDATE_PASS_EMAIL_RESET_SUCCESS:
+            return { loading: false, success: true, status: action.payload };
+        case UPDATE_PASS_EMAIL_RESET_FAIL:
+            return { loading: false, error: action.payload };
+        case UPDATE_PASS_EMAIL_RESET_RESET:
             return {};
         default:
             return state;

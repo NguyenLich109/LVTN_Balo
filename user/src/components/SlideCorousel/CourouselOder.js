@@ -87,9 +87,8 @@ export default function CorouselOder() {
                                                     </p>
                                                 )}
                                                 <p className="corousel-price">
-                                                    {(
-                                                        (product?.price * (100 - product?.discount)) /
-                                                        100
+                                                    {Number(
+                                                        ((product?.price * (100 - product?.discount)) / 100).toFixed(),
                                                     ).toLocaleString('de-DE')}
                                                     đ
                                                 </p>

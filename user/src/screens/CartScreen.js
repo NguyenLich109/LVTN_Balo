@@ -212,9 +212,11 @@ const CartScreen = ({ match, location, history }) => {
                                                 </span>
                                             )}
                                             <span className="corousel-price">
-                                                {(
-                                                    (item.product?.price * (100 - item.product?.discount)) /
-                                                    100
+                                                {Number(
+                                                    (
+                                                        (item.product?.price * (100 - item.product?.discount)) /
+                                                        100
+                                                    ).toFixed(),
                                                 ).toLocaleString('de-DE')}
                                                 đ
                                             </span>

@@ -26,6 +26,15 @@ import {
     ADD_GIFT_REQUEST,
     ADD_GIFT_SUCCESS,
     ADD_GIFT_FAIL,
+    VERIFY_EMAIL_REQUEST,
+    VERIFY_EMAIL_SUCCESS,
+    VERIFY_EMAIL_FAIL,
+    SEND_EMAIL_RESET_REQUEST,
+    SEND_EMAIL_RESET_SUCCESS,
+    SEND_EMAIL_RESET_FAIL,
+    UPDATE_PASS_EMAIL_RESET_REQUEST,
+    UPDATE_PASS_EMAIL_RESET_SUCCESS,
+    UPDATE_PASS_EMAIL_RESET_FAIL,
 } from '../Constants/UserContants';
 import axios from 'axios';
 import { ORDER_LIST_MY_RESET } from '../Constants/OrderConstants';
@@ -287,3 +296,62 @@ export const addGiftAction = (values) => async (dispatch, getState) => {
         });
     }
 };
+
+//VERIFY EMAIL
+export const verifyEmailAction = (token) => async (dispatch, getState) => {
+    try {
+        dispatch({ type: VERIFY_EMAIL_REQUEST });
+
+        const { data } = await axios.post(`/api/verifiedEmail/verified/${token}`, {});
+        dispatch({ type: VERIFY_EMAIL_SUCCESS, payload: data });
+    } catch (error) {
+        const message = error.response && error.response.data.message ? error.response.data.message : error.message;
+        if (message === 'Not authorized, token failed') {
+            dispatch(logout());
+        }
+        dispatch({
+            type: VERIFY_EMAIL_FAIL,
+            payload: message,
+        });
+    }
+};
+
+//SEND EMAIL
+export const sendEmailAction = (email) => async (dispatch, getState) => {
+    try {
+        dispatch({ type: SEND_EMAIL_RESET_REQUEST });
+
+        const { data } = await axios.post(`/api/forgotPass/forgotPassword`, { email });
+        dispatch({ type: SEND_EMAIL_RESET_SUCCESS, payload: data });
+    } catch (error) {
+        const message = error.response && error.response.data.message ? error.response.data.message : error.message;
+        if (message === 'Not authorized, token failed') {
+            dispatch(logout());
+        }
+        dispatch({
+            type: SEND_EMAIL_RESET_FAIL,
+            payload: message,
+        });
+    }
+};
+
+//RESET PASS EMAIL
+export const resetPasswordAction =
+    ({ email, password }) =>
+    async (dispatch, getState) => {
+        try {
+            dispatch({ type: UPDATE_PASS_EMAIL_RESET_REQUEST });
+
+            const { data } = await axios.post(`/api/forgotPass/resetPassword/${email}`, { password });
+            dispatch({ type: UPDATE_PASS_EMAIL_RESET_SUCCESS, payload: data });
+        } catch (error) {
+            const message = error.response && error.response.data.message ? error.response.data.message : error.message;
+            if (message === 'Not authorized, token failed') {
+                dispatch(logout());
+            }
+            dispatch({
+                type: UPDATE_PASS_EMAIL_RESET_FAIL,
+                payload: message,
+            });
+        }
+    };

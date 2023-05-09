@@ -29,9 +29,9 @@ const Register = ({ location, history }) => {
     const redirect = location.search ? location.search.split('=')[1] : '/';
 
     const userRegister = useSelector((state) => state.userRegister);
-    const { error, loading, userInfo } = userRegister;
+    const { loading, userInfo } = userRegister;
     const createUserReducer = useSelector((state) => state.createUserReducer);
-    const { createUs, sucss } = createUserReducer;
+    const { createUs, sucss, loading: loadingCreate, error } = createUserReducer;
 
     useEffect(() => {
         if (userInfo === undefined) {
@@ -129,9 +129,9 @@ const Register = ({ location, history }) => {
         <>
             <Header />
             <div className="container d-flex flex-column justify-content-center align-items-center login-center">
-                {sucss && <Message variant="alert-success">{createUs?.status}</Message>}
+                {sucss && <Message variant="alert-success">{createUs}</Message>}
                 {error && <Message variant="alert-danger">{error}</Message>}
-                {loading && <Loading />}
+                {loadingCreate && <Loading />}
 
                 <form className="Login col-md-6 col-lg-4 col-10" onSubmit={submitHandler}>
                     <div className="Login-from">

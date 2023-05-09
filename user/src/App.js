@@ -19,6 +19,8 @@ import NotFound from './screens/NotFound';
 import PrivateRouter from './PrivateRouter';
 import GiftScreen from './screens/GiftScreen';
 import Reset from './components/profileComponents/Reset';
+import UpdatePass from './screens/updatePass';
+import RegisterAccount from './screens/registerAccount';
 
 // path - router - user
 
@@ -54,6 +56,9 @@ const App = () => {
                 <Route path="/register" component={Register} />
                 <Route path="/news/:id" component={NewsScreen} />
                 <Route path="/reset" component={Reset} />
+                <Route path="/verify/register/:email/:token" component={RegisterAccount} />
+                <Route path="/verify/register/:email" component={RegisterAccount} />
+                <Route path="/updatePass/:email" component={UpdatePass} />
                 <PrivateRouter path="/profile" component={ProfileScreen} />
                 <PrivateRouter path="/byproduct" component={BuyingProductScreen} />
                 <PrivateRouter path="/gift" component={GiftScreen} />
