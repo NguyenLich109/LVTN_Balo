@@ -5,7 +5,7 @@ import Product from '../Models/ProductModel.js';
 import Order from './../Models/OrderModel.js';
 import OrderNv from './../Models/OrderNvModel.js';
 import xlsx from 'xlsx';
-import createRequestBody from '../utils/payMomo.js';
+import { createRequestBody, momoRefund } from '../utils/payMomo.js';
 import axios from 'axios';
 
 const orderRouter = express.Router();
@@ -94,8 +94,8 @@ orderRouter.post(
             `${id}`,
             'Thanh toán điện tự với Balostore',
             `${money}`,
-            `${process.env.URL_CLIENT}/order/${id}`,
-            `${process.env.URL_SERVER}/api/orders/${id}/notificationPay`,
+            `${process.env.URL_CLIENT}/loadingOrder/${id}`,
+            `https://api-lvtn-git-main-vanlong789.vercel.app/api/orders/${id}/notificationPay`,
         );
         const config = {
             headers: {
@@ -109,7 +109,7 @@ orderRouter.post(
             order.payment.signature = signature;
             order.payment.moneyPay = money;
 
-            order.save();
+            await order.save();
         }
         res.status(200).json(data);
     }),
@@ -118,19 +118,17 @@ orderRouter.post(
 orderRouter.post(
     '/:id/notificationPay',
     asyncHandler(async (req, res) => {
-        const { message } = req.body;
+        const { message, transId } = req.body;
+        console.log(req.body);
         const order = await Order.findById(req.params.id);
-
-        if (message == 'Successful.') {
+        if (message == 'Successful.' || message == 'Thành công.') {
             order.payment.timePay = new Date().getTime();
             order.payment.partner = 'MOMO';
             order.payment.message = 'Thành Công';
             order.isPaid = true;
             order.paidAt = new Date().getTime();
-            order.waitConfirmation = true;
-            order.waitConfirmationAt = new Date().getTime();
 
-            order.save();
+            await order.save();
         } else {
             order.cancel = 1;
             order.payment.message = 'error';

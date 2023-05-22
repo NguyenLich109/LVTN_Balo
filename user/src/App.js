@@ -21,6 +21,7 @@ import GiftScreen from './screens/GiftScreen';
 import Reset from './components/profileComponents/Reset';
 import UpdatePass from './screens/updatePass';
 import RegisterAccount from './screens/registerAccount';
+import LoadingOrder from './screens/LoadingOrders';
 
 // path - router - user
 
@@ -67,6 +68,7 @@ const App = () => {
                 <PrivateRouter path="/payment" component={PaymentScreen} />
                 <PrivateRouter path="/placeorder/:payment" component={PlaceOrderScreen} />
                 <PrivateRouter path="/order/:id" component={OrderScreen} />
+                <PrivateRouter path="/loadingOrder/:id" component={LoadingOrder} />
                 <Route path="*" component={NotFound} />
             </Switch>
         </Router>

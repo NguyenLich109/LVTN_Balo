@@ -102,7 +102,7 @@ discountRoutes.put(
     }),
 );
 
-//UPDATE DISCOUNT
+//VERYFI DISCOUNT
 discountRoutes.put(
     '/:id/verifi',
     protect,
@@ -146,8 +146,16 @@ discountRoutes.get(
     protect,
     asyncHandler(async (req, res) => {
         const findDiscount = await discount.find({ verifi: true });
-        if (findDiscount) {
-            res.status(201).json(findDiscount);
+        const listDiscount = [];
+        const time = new Date().getTime();
+
+        findDiscount.forEach((discount) => {
+            if (time < discount.timeDiscount) {
+                listDiscount.push(discount);
+            }
+        });
+        if (listDiscount) {
+            res.status(201).json(listDiscount);
         } else {
             res.status(404);
             throw new Error('Không tìm thấy mã giảm giá');
@@ -166,17 +174,15 @@ discountRoutes.post(
         const finGift = findUser.gift.find((data) => data.gift == nameDiscount);
         if (findDiscount && finGift) {
             let time = new Date().getTime();
-            if (time <= findDiscount.timeDiscount && findDiscount.countInStock > 0) {
+            if (time <= findDiscount.timeDiscount) {
                 findUser.gift = findUser.gift.filter((data) => data.gift != nameDiscount);
-                findDiscount.countInStock = findDiscount.countInStock < 1 ? 0 : findDiscount.countInStock - 1;
-                const y = await findDiscount.save();
-                const x = await findUser.save();
-                if (x) {
+                const save = await findUser.save();
+                if (save) {
                     res.status(200).json(findDiscount);
                 }
             } else {
                 res.status(404);
-                throw new Error('Mã này đã hết hạn hoặc số lượng đã hết vui lòng đổi mã khác');
+                throw new Error('Mã này đã hết hạn vui lòng đổi mã khác');
             }
         } else {
             res.status(404);

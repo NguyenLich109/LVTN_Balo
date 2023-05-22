@@ -123,44 +123,14 @@ const OrderScreen = ({ match }) => {
         dispatch(getOrderDetails(orderId));
     }, [successCancel]);
     useEffect(() => {
-        // const addPayPalScript = async () => {
-        //   const { data: clientId } = await axios.get("/api/config/paypal");
-        //   const script = document.createElement("script");
-        //   script.type = "text/javascript";
-        //   script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`;
-        //   script.async = true;
-        //   script.onload = () => {
-        //     setSdkReady(true);
-        //   };
-        //   document.body.appendChild(script);
-        // };
         if (!order || successPay) {
             dispatch({ type: ORDER_PAY_RESET });
             dispatch(getOrderDetails(orderId));
         }
-        // else if (!order.isPaid) {
-        // if (!window.paypal) {
-        //   addPayPalScript();
-        // } else {
-        //   setSdkReady(true);
-        // }
-        // }
     }, [dispatch, orderId, order]);
 
-    // const successPaymentHandler = (paymentResult) => {
-    //     dispatch(payOrder(orderId, paymentResult));
-    // };
-
     const handlerSuccessCart = () => {
-        const filterCart = itemOrder?.filter((item) => item.productReview.length === 0);
-        if (filterCart.length === 0) {
-            if (window.confirm('Cảm ơn bạn đã mua hàng chúc bạn một ngày tốt lành!')) {
-                dispatch(completeOrder(orderId));
-            }
-        } else {
-            if (window.confirm('Bạn cần đánh giá hết sản phẩm để hoàn tất đơn hàng')) {
-            }
-        }
+        dispatch(completeOrder(orderId));
     };
     return (
         <>

@@ -97,7 +97,7 @@ textarea:focus {
     background-color: #f4f4f4;
 }
 .navbar-brand img {
-    width: 33%;
+    width: 100px;
 }
 .input-group {
     height: 45px;

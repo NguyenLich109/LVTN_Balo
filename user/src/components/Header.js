@@ -270,7 +270,7 @@ const Header = (props) => {
                         {/* PC HEADER */}
                         <div className="pc-header">
                             <div className="row">
-                                <div className="col-md-3 col-4 d-flex align-items-center">
+                                <div className="col-md-2 col-4 d-flex align-items-center">
                                     <Link className="navbar-brand" onClick={handleRest} to="/">
                                         <img alt="logo" src="/images/logo2.png" />
                                     </Link>
@@ -296,7 +296,7 @@ const Header = (props) => {
                                     </form>
                                     <NavBar></NavBar>
                                 </div>
-                                <div className="col-md-3 d-flex align-items-center justify-content-end Login-Register">
+                                <div className="col-md-4 d-flex align-items-center justify-content-end Login-Register">
                                     {userInfo ? (
                                         <div className="btn-group">
                                             <button
