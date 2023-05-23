@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Loading from './../components/LoadingError/Loading';
 import Header from './../components/Header';
 import { getOrderDetails } from '../Redux/Actions/OrderActions';
+import './style/loadingMomo.css';
 
 export default function LoadingOrder({ match }) {
     const { id } = match.params;
@@ -12,7 +13,7 @@ export default function LoadingOrder({ match }) {
     const dispatch = useDispatch();
 
     const urlParams = new URLSearchParams(location.search);
-    const signature = urlParams.get('signature');
+    const message = urlParams.get('message');
     const orderDetails = useSelector((state) => state.orderDetails);
     const { order } = orderDetails;
 
@@ -24,7 +25,7 @@ export default function LoadingOrder({ match }) {
 
     useEffect(() => {
         const setinterval = setInterval(() => {
-            if (signature) {
+            if (message) {
                 dispatch(getOrderDetails(id));
             }
         }, 1000);
@@ -32,11 +33,21 @@ export default function LoadingOrder({ match }) {
         return () => {
             clearInterval(setinterval);
         };
-    }, [dispatch, id, signature]);
+    }, [dispatch, id, message]);
+
     return (
         <>
             <Header />
-            <Loading />
+            <div className="paymomo">
+                <div className="paymomo-loading">
+                    <Loading />
+                    {message == 'Successful.' || message == 'Thành công.' ? (
+                        <span>Đang chờ xử lý thanh toán...</span>
+                    ) : (
+                        <span>Thanh toán thất bại...</span>
+                    )}
+                </div>
+            </div>
         </>
     );
 }

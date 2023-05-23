@@ -32,7 +32,7 @@ const PlaceOrderScreen = ({ history, match }) => {
     const orderCreate = useSelector((state) => state.orderCreate);
     const { order, success, error } = orderCreate;
     const payMomoReducer = useSelector((state) => state.payMomoReducer);
-    const { success: sucessPay, payItems } = payMomoReducer;
+    const { success: sucessPay, payItems, loading: loadingPay } = payMomoReducer;
 
     useEffect(() => {
         if (successCheck) {
@@ -212,6 +212,7 @@ const PlaceOrderScreen = ({ history, match }) => {
         <>
             <Header />
             {loadingCheck && <Loading />}
+            {loadingPay && <Loading />}
             {error && <Loading />}
             <Toast />
             <div className="container">
