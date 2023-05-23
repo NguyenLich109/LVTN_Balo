@@ -44,7 +44,7 @@ export default function LoadingOrder({ match }) {
                     {message == 'Successful.' || message == 'Thành công.' ? (
                         <span>Đang chờ xử lý thanh toán...</span>
                     ) : (
-                        <span>Thanh toán thất bại..</span>
+                        <span>Thanh toán thất bại...</span>
                     )}
                 </div>
             </div>
