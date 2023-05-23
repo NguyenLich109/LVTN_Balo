@@ -374,28 +374,34 @@ userRouter.put(
         const { id, gift, date, price } = req.body;
         const user = await User.findById(id);
         const findDiscount = await discount.findOne({ nameDiscount: gift });
-        if (findDiscount) {
+        let time = new Date().getTime();
+
+        if (!findDiscount) {
+            res.status(400);
+            throw new Error('Mã này không tồn tại');
+        }
+        if (time > findDiscount.timeDiscount) {
+            res.status(400);
+            throw new Error('Mã này đã hết hạn');
+        }
+        if (findDiscount.countInStock > 0) {
             const checkId = findDiscount.idUser.find((user) => user == id);
-            if (findDiscount.countInStock > 0) {
-                if (!checkId) {
-                    user.gift.push({ gift, date, price });
-                    findDiscount.idUser.push(id);
-                    const saveDiscount = await findDiscount.save();
-                    const save = await user.save();
-                    if (save) {
-                        res.send(user);
-                    }
-                } else {
-                    res.status(400);
-                    throw new Error('Mã này đã được nhận');
+            if (!checkId) {
+                user.gift.push({ gift, date, price });
+                findDiscount.countInStock = findDiscount.countInStock - 1;
+                findDiscount.idUser.push(id);
+                const saveDiscount = await findDiscount.save();
+                const save = await user.save();
+                if (save) {
+                    res.send(user);
                 }
             } else {
                 res.status(400);
-                throw new Error('Số lượng mã này đã hết vui lòng tìm mã khác');
+                throw new Error('Mã này đã được nhận');
             }
         } else {
             res.status(400);
-            throw new Error('Mã này không tồn tại');
+            throw new Error('Số lượng mã này đã hết vui lòng tìm mã khác');
         }
     }),
 );

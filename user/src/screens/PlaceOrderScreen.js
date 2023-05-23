@@ -32,7 +32,7 @@ const PlaceOrderScreen = ({ history, match }) => {
     const orderCreate = useSelector((state) => state.orderCreate);
     const { order, success, error } = orderCreate;
     const payMomoReducer = useSelector((state) => state.payMomoReducer);
-    const { success: sucessPay, payItems } = payMomoReducer;
+    const { success: sucessPay, payItems, loading: loadingPay } = payMomoReducer;
 
     useEffect(() => {
         if (successCheck) {
@@ -212,6 +212,7 @@ const PlaceOrderScreen = ({ history, match }) => {
         <>
             <Header />
             {loadingCheck && <Loading />}
+            {loadingPay && <Loading />}
             {error && <Loading />}
             <Toast />
             <div className="container">
@@ -297,7 +298,11 @@ const PlaceOrderScreen = ({ history, match }) => {
                                         <div
                                             className="order-product row"
                                             key={index}
-                                            style={{ border: '1px solid rgb(218, 216, 216)', borderRadius: '4px' }}
+                                            style={{
+                                                border: '1px solid rgb(218, 216, 216)',
+                                                borderRadius: '4px',
+                                                marginBottom: '0',
+                                            }}
                                         >
                                             {findCartCountInStock(item)}
                                         </div>
@@ -306,13 +311,13 @@ const PlaceOrderScreen = ({ history, match }) => {
                         )}
                     </div>
                 </div>
-                <div className="row" style={{ padding: '10px 0', backgroundColor: '#fff', marginTop: '10px' }}>
+                <div className="row" style={{ padding: '10px 0', backgroundColor: '#fff' }}>
                     {/* total */}
                     <div
                         className="col-lg-9 d-flex align-items-end flex-column subtotal-order"
                         style={{ border: '1px solid rgb(218, 216, 216)', borderRadius: '4px' }}
                     >
-                        <table className="table fix-bottom">
+                        <table className="table fix-bottom" style={{ border: 'none' }}>
                             <tbody>
                                 <tr>
                                     <td>
