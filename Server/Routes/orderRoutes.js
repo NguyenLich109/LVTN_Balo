@@ -120,8 +120,7 @@ orderRouter.post(
     asyncHandler(async (req, res) => {
         const { message } = req.body;
         const order = await Order.findById(req.params.id);
-
-        if (message == 'Successful.') {
+        if (message == 'Successful.' || message == 'Thành công.') {
             order.payment.timePay = new Date().getTime();
             order.payment.partner = 'MOMO';
             order.payment.message = 'Thành Công';
