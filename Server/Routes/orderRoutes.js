@@ -539,12 +539,12 @@ orderRouter.put(
 
                 if (order.paymentMethod == 'payment-with-online') {
                     createOrder.isPaid = order.isPaid;
-                    createOrder.isPaidAt = order.isPaidAt;
+                    createOrder.paidAt = order.paidAt;
                 }
 
                 const retult = await createOrder.save();
                 const updatedOrder = await order.save();
-                res.json(updatedOrder);
+                res.json(retult);
             } else {
                 res.status(404);
                 throw new Error('Đơn hàng này đã được một nhân viên khác nhận');
@@ -899,10 +899,13 @@ orderRouter.post(
                             ? ((status = 'Hoàn tất'), (time2 = new Date(value.completeAdminAt).toLocaleString()))
                             : value.receive
                             ? ((status = 'Đã nhận hàng'), (time2 = new Date(value.receiveAt).toLocaleString()))
+                            : value.errorPaid && value.waitConfirmation && value.isDelivered
+                            ? (value.isPaid
+                                  ? (status = 'Đã thanh toán (giao thất bại)')
+                                  : (status = ' Giao hàng thất bại'),
+                              (time2 = new Date(value.errorPaidAt).toLocaleString()))
                             : value.waitConfirmation && value.isDelivered && value.isPaid
                             ? ((status = 'Đã thanh toán'), (time2 = new Date(value.paidAt).toLocaleString()))
-                            : value.errorPaid && value.waitConfirmation && value.isDelivered
-                            ? ((status = 'Giao hàng thất bại'), (time2 = new Date(value.errorPaidAt).toLocaleString()))
                             : value.waitConfirmation && value.isDelivered
                             ? ((status = 'Đang giao'), (time2 = new Date(value.deliveredAt).toLocaleString()))
                             : value.waitConfirmation
