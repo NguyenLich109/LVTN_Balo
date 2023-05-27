@@ -5,7 +5,7 @@ export default function NewsStatistics() {
         <div className="col-xl-4 col-lg-12">
             <div className="card mb-4 shadow-sm">
                 <article className="card-body">
-                    <h5 className="card-title">Thống kê tin tức</h5>
+                    <h5 className="card-title">Thống kê đơn hàng</h5>
                     <iframe
                         style={{
                             background: '#FFFFFF',
